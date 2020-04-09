@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  goldenhands:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/usr/src/goldenhands2/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - goldenhands-db
+  goldenhands-db:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=goldenhands
+      - POSTGRES_PASSWORD=goldenhands_pw
+      - POSTGRES_DB=goldenhands_dev
+
+volumes:
+  postgres_data:
