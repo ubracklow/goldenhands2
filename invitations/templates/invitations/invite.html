@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% extends 'invitations/base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-9">
+                <h2>Step 5 - Send out the invitation</h2>
+                <br>
+                <h4>We will send the following invitation email to yourself and all of your guests.</h4>
+                <br>
+                <div class="container_mail">
+                    <div class="row">
+                        {% include 'invitations/invite_email.html' %}
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-2"></div>
+                    </div>
+                </div>
+                <h2><a class="myButton" href="{% url 'invitations:event_final' event.pk %}">Send Email️ </a></h2>
+                <div class="col-sm-1"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

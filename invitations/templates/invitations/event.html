@@ -1,41 +1,24 @@
 <!DOCTYPE html>
 {% extends 'invitations/base.html' %}
 
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
 
     {% block content %}
-
     <div class="container">
-            <div class="row">
-
-                <div class="col-sm-2">
-                </div>
+        <div class="row">
+            <div class="col-sm-2"></div>
                 <div class="col-sm-9">
-
-                    <h1>Hello there!</h1>
-
-                    <h4>Have another craft club meeting or poker night coming up?</h4>
-                    <h4>Being a host is awesome! But sometimes you just need a little help from your friends.</h4>
-                    <h4>BYO-anything is so passé. Use Golden Hands to invite and charmingly ask for the snack you really want your guests to bring! </h4>
-
-                    <br />
-                    <h2>Step 1</h2>
-
-                    <form  id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
-
-                   {% csrf_token %}
-                    {{ form.as_p }}
-                    <input id="submit" type="submit" value="Next Step - Who are your guests?">
-                    </form>
+                    <h2>Step 2 - What's the occasion?</h2>
                     <br>
-
-
+                    <form  id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                    <input class="myButton" id="submit" type="submit" value="Next Step - Who are you inviting?">
+                    </form>
                 </div>
-
-            <div class="col-sm-1">
-
-
-            </div>
+            <div class="col-sm-1"></div>
+        </div>
     </div>
-
-</div>
     {% endblock %}

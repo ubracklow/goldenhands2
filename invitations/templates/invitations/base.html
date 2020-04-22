@@ -2,26 +2,33 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-    <title>Golden Hands</title>
+        <title>Golden Hands</title>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Open+Sans:wght@600&display=swap">
 
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="{% static 'css/goldenhands.css' %}">
+     <link href="https://fonts.googleapis.com/css2?family=Martel:wght@900&family=Montserrat&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/goldenhands.css' %}">
+        <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+        {% block extrahead %}
+        {% endblock %}
     </head>
 
     <body>
 
-    <div class="start-page-header">
-        <h1>Golden Hands<br/></h1>
-    </div>
+        <div class="start-page-header">
+            <h1>Golden Hands<br/></h1>
+        </div>
 
-    {% block content %}
-    {% endblock %}
+        {% block content %}
+        {% endblock %}
 
     </body>
 </html>

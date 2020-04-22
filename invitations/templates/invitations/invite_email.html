@@ -1,0 +1,34 @@
+
+
+    <div class="email-header">
+        <h1>Golden Hands<br/></h1>
+    </div>
+   <div class="col-sm-8">
+    <h4>Hello lovely people!</h4>
+    <br>
+    <h4>{{event.organizer.name}} is happy to invite you to the following event:</h4> <br>
+
+    <h2>{{event.occasion}} is happening!</h2>
+    <br>
+    <h4> Where: {{event.location}}</h4>
+    <h4> When: {{event.date}}</h4> <br>
+
+    <p>To make the best out of the occasion, {{event.organizer.name}} needs your helping Golden Hands.</p><br>
+       {% if even_or_task_outnumber %}
+        {% for t in tasks %}
+            <p>Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}. </p>
+        {% endfor %}
+    {% else %}
+        {% for t in tasks %}
+            <p>Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}. </p>
+        {% endfor %}
+        {% for a in attendees_without_task %}
+            <p>Lovely {{ a.attendee.name }}  - please come as you are. </p>
+        {% endfor %}
+    {% endif %}
+   <br>
+    <p>To RSVP or in case of questions you can reach your host at {{event.organizer.email}}.</p><br>
+
+    <h4>Be there or be square!</h4>
+   <p>*disclaimer: tasks were assigned by the magic hand of fate.</p>
+</div>

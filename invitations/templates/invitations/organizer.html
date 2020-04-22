@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'invitations/base.html' %}
+
+    {% block content %}
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-9">
+                    <h1>Hello there!</h1>
+                    <br>
+                    <h2>Step 1 - Who is inviting?</h2>
+                    <br>
+                    <form id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <input class="myButton" id="submit" type="submit" value="Next Step - What's the occasion?">
+                    </form>
+                    <br>
+                </div>
+            <div class="col-sm-1"></div>
+            </div>
+        s</div>
+    {% endblock %}

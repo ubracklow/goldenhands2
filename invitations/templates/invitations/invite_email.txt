@@ -1,0 +1,29 @@
+Hello lovely people!
+
+{{event.organizer.name}} is happy to invite you to the following event:
+
+{{event.occasion}} is happening!
+
+Where: {{event.location}}
+When: {{event.date}}
+
+To make the best out of the occasion, {{event.organizer.name}} needs your helping Golden Hands.
+{% if even_or_task_outnumber %}
+{% for t in tasks %}
+Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}.
+{% endfor %}
+{% else %}
+{% for t in tasks %}
+Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}.
+{% endfor %}
+{% for a in attendees_without_task %}
+Lovely {{ a.attendee.name }}  - please come as you are.
+{% endfor %}
+{% endif %}
+
+To RSVP or in case of questions you can reach your host at {{event.organizer.email}}.
+
+Be there or be square!
+
+*disclaimer: tasks were assigned by the magic hand of fate.
+

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% extends 'invitations/base.html' %}
+    {% block content %}
+
+        <div class="container" xmlns="http://www.w3.org/1999/html">
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-9">
+                    <h2>Being a host is awesome! But sometimes you just need a little help from your friends. 💞 </h2>
+                    <br>
+                    <br>
+                    <h4>You have another craft club meeting or poker night coming up?</h4>
+                    <br>
+                    <h4>Snacks, Drinks, Decoration... you thought of everything.
+                        But alas - there is just no time to prepare it all by yourself!</h4>
+                     <br>
+                    <h4>Use Golden Hands to send out the invitation and assign open to-dos to your guests.</h4>
+                     <br>
+                    <h2><a class="myButton" href="{% url 'invitations:organizer_create' %}">Step 1 - who are you? </a></h2>
+
+                    <br>
+
+
+                </div>
+
+            <div class="col-sm-1">
+
+
+            </div>
+    </div>
+
+</div>
+    {% endblock %}

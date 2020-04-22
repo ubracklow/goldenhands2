@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% extends 'invitations/base.html' %}
+
+    {% block content %}
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-9">
+                    <h2>Step 4 - What else do we need?</h2>
+                    <br>
+                    <h4>What would you like people to bring? Snacks, Drinks, Decoration, Equipment...</h4>
+                    <br>
+                    <h4>The items or tasks you add here will be assigned by the magic hand of fate among your guests.</h4>
+                    <br>
+                    <form id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.management_form }}
+                        {% for f in form %}
+                            {{ f }}<br><br>
+                        {% endfor %}
+                        <input class="myButton" id="submit" type="submit" value="Final Step - Review and send the invitation">
+                    </form>
+                </div>
+            <div class="col-sm-1"></div>
+        </div>
+        </div>
+    {% endblock %}

@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from invitations.models import Event, EventAttendee, EventTask, Person
+
+admin.site.register(Person)
+admin.site.register(Event)
+admin.site.register(EventAttendee)
+admin.site.register(EventTask)
