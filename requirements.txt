@@ -1,10 +1,13 @@
 black==19.10b0
 Django==3.0.3
+dj-database-url==0.5.0
+django-bootstrap-datepicker-plus
 flake8===3.7.9
+gunicorn==20.0.4
 isort==4.3.21
 psycopg2-binary==2.8.4
 pytest-cov==2.8.1
 pytest-django==3.8.0
 pytest==5.3.1
-django-bootstrap-datepicker-plus
+whitenoise==5.0.1
 

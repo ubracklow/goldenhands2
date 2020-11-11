@@ -97,7 +97,7 @@ class EmailMixin:
         return context
 
 
-class InviteView(TemplateView, EmailMixin):
+class InviteView(EmailMixin, TemplateView):
     template_name = "invitations/invite.html"
 
     def get_context_data(self, **kwargs):
