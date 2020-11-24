@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Django application - lint and run tests
+name: Django application on docker - lint and run tests
 
 on:
   push:
@@ -11,34 +11,23 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:12.0-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: github_actions
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+    - name: Build the stack
+      run: docker-compose -f docker-compose.override.github-actions.yml up -d
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        docker-compose -f docker-compose.override.github-actions.yml exec -T goldenhands flake8 . --count \
+        --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+        docker-compose -f docker-compose.override.github-actions.yml exec -T goldenhands flake8 . --count \
+        --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: collect static files
       run: |
-        pytest
+        docker-compose -f docker-compose.override.github-actions.yml exec -T goldenhands python manage.py collectstatic
+    - name: Test with pytest
+      run: docker-compose -f docker-compose.override.github-actions.yml exec -T goldenhands pytest
