@@ -5,7 +5,7 @@ name: Django application on docker - lint and run tests
 
 on:
   push:
-    branches: [ github_actions ]
+    branches: [ master ]
 
 jobs:
   build:
