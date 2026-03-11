@@ -1,4 +1,4 @@
-from bootstrap_datepicker_plus import DateTimePickerInput
+from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -27,7 +27,7 @@ class EventCreateView(CreateView):
 
     def get_form(self):
         form = super().get_form()
-        form.fields["date"].widget = DateTimePickerInput(format="%d/%m/%Y %H:%M")
+        form.fields["date"].widget = DateTimePickerInput(options={"format": "DD/MM/YYYY HH:mm"})
         return form
 
     def form_valid(self, form):

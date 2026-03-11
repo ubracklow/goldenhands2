@@ -9,7 +9,8 @@ from invitations.views import FinalView
 
 @pytest.mark.django_db
 class TestModels:
-    def setup(self):
+    @pytest.fixture(autouse=True)
+    def _setup_data(self, db):
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         person1 = Person.objects.create(name="Thea", email="your@mail.com")
         person2 = Person.objects.create(name="Stefan", email="their@mail.com")
@@ -158,7 +159,8 @@ class TestEventTaskView:
 
 @pytest.mark.django_db
 class TestInviteView:
-    def setup(self):
+    @pytest.fixture(autouse=True)
+    def _setup_data(self, db):
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         person1 = Person.objects.create(name="Thea", email="your@mail.com")
         person2 = Person.objects.create(name="Stefan", email="their@mail.com")
@@ -213,7 +215,8 @@ class TestInviteView:
 
 @pytest.mark.django_db
 class TestFinalView:
-    def setup(self):
+    @pytest.fixture(autouse=True)
+    def _setup_data(self, db):
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         person1 = Person.objects.create(name="Thea", email="your@mail.com")
         person2 = Person.objects.create(name="Stefan", email="their@mail.com")
