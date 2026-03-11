@@ -4,20 +4,28 @@
     {% block content %}
         <div class="container">
             <div class="row">
-                <div class="col-sm-2"></div>
-                <div class="col-sm-9">
-                    <h1>Hello there!</h1>
+                <div class="col-sm-offset-1 col-sm-10">
+                    <h3>Step 1 - Who is inviting?</h3>
                     <br>
-                    <h2>Step 1 - Who is inviting?</h2>
-                    <br>
-                    <form id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
+                    <form id="user_form" class="form-horizontal" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        {{ form.as_p }}
-                        <input class="myButton" id="submit" type="submit" value="Next Step - What's the occasion?">
+                        {% for field in form %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label class="col-sm-3 control-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div class="col-sm-7">
+                                {{ field }}
+                                {% if field.errors %}<p class="help-block">{{ field.errors }}</p>{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-7">
+                                <input class="myButton" id="submit" type="submit" value="Next Step - What's the occasion?">
+                            </div>
+                        </div>
                     </form>
                     <br>
                 </div>
-            <div class="col-sm-1"></div>
             </div>
-        s</div>
+        </div>
     {% endblock %}

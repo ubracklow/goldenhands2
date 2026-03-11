@@ -1,4 +1,3 @@
-from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
@@ -34,11 +33,6 @@ class OrganizerEditView(OrganizerFormMixin, UpdateView):
 class EventFormMixin:
     form_class = EventForm
     template_name = "invitations/event.html"
-
-    def get_form(self):
-        form = super().get_form()
-        form.fields["date"].widget = DateTimePickerInput(options={"format": "DD/MM/YYYY HH:mm"})
-        return form
 
 
 class EventCreateView(EventFormMixin, CreateView):
@@ -191,3 +185,5 @@ class FinalView(EmailMixin, TemplateView):
         email.attach_alternative(html_content, "text/html")
         email.to = recipients
         email.send()
+
+

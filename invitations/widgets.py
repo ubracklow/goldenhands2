@@ -20,6 +20,7 @@ class LocationAutocompleteWidget(TextInput):
 
   function closeSuggestions() {{
     list.innerHTML = "";
+    list.style.display = "none";
     activeIndex = -1;
   }}
 
@@ -42,6 +43,7 @@ class LocationAutocompleteWidget(TextInput):
       .then(function(r) {{ return r.json(); }})
       .then(function(data) {{
         list.innerHTML = "";
+        list.style.display = data.length ? "block" : "none";
         activeIndex = -1;
         data.forEach(function(item) {{
           var li = document.createElement("li");

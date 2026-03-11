@@ -3,24 +3,66 @@
 
 {% block extrahead %}
 {{ form.media }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 {% endblock %}
 
     {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-sm-2"></div>
-                <div class="col-sm-9">
-                    <h2>Step 2 - What's the occasion?</h2>
-                    <br>
-                    <form  id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                    <a class="myButton" href="{{ back_url }}">Back</a>
-                    <input class="myButton" id="submit" type="submit" value="Next Step - Who are you inviting?">
-                    </form>
-                    <p><small>Address search powered by <a href="https://nominatim.openstreetmap.org">Nominatim</a> / OpenStreetMap contributors</small></p>
-                </div>
-            <div class="col-sm-1"></div>
+            <div class="col-sm-offset-1 col-sm-10">
+                <h3>Step 2 - What's the occasion?</h3>
+                <br>
+                <form id="user_form" class="form-horizontal" action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-group {% if form.date.errors %}has-error{% endif %}">
+                        <label class="col-sm-3 control-label" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+                        <div class="col-sm-7">
+                            <div class="input-group" id="datetimepicker">
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                {{ form.date }}
+                            </div>
+                            {% if form.date.errors %}<p class="help-block">{{ form.date.errors }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group {% if form.occasion.errors %}has-error{% endif %}">
+                        <label class="col-sm-3 control-label" for="{{ form.occasion.id_for_label }}">{{ form.occasion.label }}</label>
+                        <div class="col-sm-7">
+                            {{ form.occasion }}
+                            {% if form.occasion.errors %}<p class="help-block">{{ form.occasion.errors }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group {% if form.location.errors %}has-error{% endif %}">
+                        <label class="col-sm-3 control-label" for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+                        <div class="col-sm-7" style="position: relative;">
+                            {{ form.location }}
+                            {% if form.location.errors %}<p class="help-block">{{ form.location.errors }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-7">
+                            <a class="myButton" href="{{ back_url }}">Back</a>
+                            <input class="myButton" id="submit" type="submit" value="Next Step - Who are you inviting?">
+                        </div>
+                    </div>
+                </form>
+                <p><small>Address search powered by <a href="https://nominatim.openstreetmap.org">Nominatim</a> / OpenStreetMap contributors</small></p>
+            </div>
         </div>
     </div>
+    <script>
+    $(function () {
+        $('#{{ form.date.id_for_label }}').datetimepicker({
+            format: 'DD/MM/YYYY HH:mm'
+        });
+        $('#datetimepicker .input-group-btn, #datetimepicker .input-group-addon:last-child').hide();
+    });
+    </script>
     {% endblock %}

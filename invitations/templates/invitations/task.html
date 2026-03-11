@@ -4,25 +4,34 @@
     {% block content %}
         <div class="container">
             <div class="row">
-                <div class="col-sm-2"></div>
-                <div class="col-sm-9">
-                    <h2>Step 4 - What else do we need?</h2>
+                <div class="col-sm-offset-1 col-sm-10">
+                    <h3>Step 4 - What else do we need?</h3>
                     <br>
                     <h4>What would you like people to bring? Snacks, Drinks, Decoration, Equipment...</h4>
                     <br>
                     <h4>The items or tasks you add here will be assigned by the magic hand of fate among your guests.</h4>
                     <br>
-                    <form id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
+                    <form id="user_form" class="form-horizontal" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form.management_form }}
                         {% for f in form %}
-                            {{ f }}<br><br>
+                        <div class="form-group {% if f.task.errors %}has-error{% endif %}">
+                            <label class="col-sm-3 control-label">Task {{ forloop.counter }}</label>
+                            <div class="col-sm-7">
+                                {{ f.task }}
+                                {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+                                {% if f.task.errors %}<p class="help-block">{{ f.task.errors }}</p>{% endif %}
+                            </div>
+                        </div>
                         {% endfor %}
-                        <a class="myButton" href="{% url 'invitations:event_add_attendee' pk %}">Back</a>
-                        <input class="myButton" id="submit" type="submit" value="Final Step - Review and send the invitation">
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-7">
+                                <a class="myButton" href="{% url 'invitations:event_add_attendee' pk %}">Back</a>
+                                <input class="myButton" id="submit" type="submit" value="Final Step - Review and send the invitation">
+                            </div>
+                        </div>
                     </form>
                 </div>
-            <div class="col-sm-1"></div>
-        </div>
+            </div>
         </div>
     {% endblock %}
