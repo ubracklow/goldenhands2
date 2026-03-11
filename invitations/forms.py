@@ -1,10 +1,12 @@
-from django.forms import DateTimeField, ModelForm, formset_factory
+from django.forms import CharField, DateTimeField, ModelForm, formset_factory
 
 from invitations.models import Event, EventTask, Person
+from invitations.widgets import LocationAutocompleteWidget
 
 
 class EventForm(ModelForm):
     date = DateTimeField(input_formats=["%d/%m/%Y %H:%M"])
+    location = CharField(widget=LocationAutocompleteWidget())
 
     class Meta:
         model = Event
