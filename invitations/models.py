@@ -45,7 +45,7 @@ class EventTask(models.Model):
     task = models.CharField(max_length=255)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     attendee = models.ForeignKey(
-        EventAttendee, on_delete=models.CASCADE, blank=True, null=True
+        EventAttendee, on_delete=models.SET_NULL, blank=True, null=True
     )
 
     def __str__(self):

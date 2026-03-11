@@ -14,6 +14,7 @@
                         {% for f in form %}
                             {{ f }}<br><br>
                         {% endfor %}
+                        <a class="myButton" href="{% url 'invitations:event_edit' pk %}">Back</a>
                         <input class="myButton" id="submit" type="submit" value="Next Step - What else do we need?">
                     </form>
                 </div>

@@ -1,8 +1,8 @@
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView, TemplateView
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, FormView, TemplateView, UpdateView
 
 from invitations.forms import EventForm, EventTaskFormSet, PersonFormSet
 from invitations.models import Event, EventAttendee, Person
@@ -12,27 +12,58 @@ class StartView(TemplateView):
     template_name = "invitations/start.html"
 
 
-class OrganizerView(CreateView):
-    template_name = "invitations/organizer.html"
+class OrganizerFormMixin:
     model = Person
     fields = ["name", "email"]
+    template_name = "invitations/organizer.html"
 
+
+class OrganizerView(OrganizerFormMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy("invitations:event_create", kwargs={"pk": self.object.pk})
 
 
-class EventCreateView(CreateView):
-    template_name = "invitations/event.html"
+class OrganizerEditView(OrganizerFormMixin, UpdateView):
+    def get_success_url(self):
+        event = Event.objects.filter(organizer=self.object).first()
+        if event:
+            return reverse_lazy("invitations:event_edit", kwargs={"pk": event.pk})
+        return reverse_lazy("invitations:event_create", kwargs={"pk": self.object.pk})
+
+
+class EventFormMixin:
     form_class = EventForm
+    template_name = "invitations/event.html"
 
     def get_form(self):
         form = super().get_form()
         form.fields["date"].widget = DateTimePickerInput(options={"format": "DD/MM/YYYY HH:mm"})
         return form
 
+
+class EventCreateView(EventFormMixin, CreateView):
     def form_valid(self, form):
         form.instance.organizer = Person.objects.get(pk=self.kwargs["pk"])
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("invitations:organizer_edit", kwargs={"pk": self.kwargs["pk"]})
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "invitations:event_add_attendee", kwargs={"pk": self.object.pk}
+        )
+
+
+class EventEditView(EventFormMixin, UpdateView):
+    model = Event
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("invitations:organizer_edit", kwargs={"pk": self.object.organizer.pk})
+        return context
 
     def get_success_url(self):
         return reverse_lazy(
@@ -46,8 +77,23 @@ class AttendeeView(FormView):
     form_class = PersonFormSet
     event = None
 
+    def get_initial(self):
+        event = Event.objects.get(pk=self.kwargs["pk"])
+        return [
+            {"name": ea.attendee.name, "email": ea.attendee.email}
+            for ea in event.eventattendee_set.select_related("attendee").all()
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pk"] = self.kwargs["pk"]
+        return context
+
     def form_valid(self, form):
         self.event = Event.objects.get(pk=self.kwargs["pk"])
+        attendee_pks = list(self.event.eventattendee_set.values_list("attendee_id", flat=True))
+        self.event.eventattendee_set.all().delete()
+        Person.objects.filter(pk__in=attendee_pks).delete()
         for data in form.cleaned_data:
             if data != {}:
                 person = Person.objects.create(name=data["name"], email=data["email"])
@@ -62,15 +108,25 @@ class TaskView(FormView):
     template_name = "invitations/task.html"
     form_class = EventTaskFormSet
 
+    def get_initial(self):
+        event = Event.objects.get(pk=self.kwargs["pk"])
+        return [{"task": t.task} for t in event.eventtask_set.all()]
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["form_kwargs"] = {"event": self.kwargs["pk"]}
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pk"] = self.kwargs["pk"]
+        return context
+
     def form_valid(self, form):
+        event = Event.objects.get(pk=self.kwargs["pk"])
+        event.eventtask_set.all().delete()
         for f in form:
             f.save()
-        event = Event.objects.get(pk=self.kwargs["pk"])
         event.assign_attendee_tasks()
         return super().form_valid(form)
 

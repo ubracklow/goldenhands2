@@ -15,6 +15,7 @@
                     <form  id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form.as_p }}
+                    <a class="myButton" href="{{ back_url }}">Back</a>
                     <input class="myButton" id="submit" type="submit" value="Next Step - Who are you inviting?">
                     </form>
                     <p><small>Address search powered by <a href="https://nominatim.openstreetmap.org">Nominatim</a> / OpenStreetMap contributors</small></p>

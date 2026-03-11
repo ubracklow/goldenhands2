@@ -3,8 +3,10 @@ from django.urls import path
 from invitations.views import (
     AttendeeView,
     EventCreateView,
+    EventEditView,
     FinalView,
     InviteView,
+    OrganizerEditView,
     OrganizerView,
     StartView,
     TaskView,
@@ -14,9 +16,11 @@ app_name = "invitations"
 urlpatterns = [
     path("", StartView.as_view(), name="start"),
     path("organizer/add", OrganizerView.as_view(), name="organizer_create"),
+    path("organizer/<int:pk>/edit/", OrganizerEditView.as_view(), name="organizer_edit"),
     path(
         "organizer/<int:pk>/add_event/", EventCreateView.as_view(), name="event_create"
     ),
+    path("event/<int:pk>/edit_event/", EventEditView.as_view(), name="event_edit"),
     path(
         "event/<int:pk>/add_attendee/",
         AttendeeView.as_view(),

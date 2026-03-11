@@ -17,7 +17,10 @@
                         <div class="col-sm-2"></div>
                     </div>
                 </div>
-                <h2><a class="myButton" href="{% url 'invitations:event_final' event.pk %}">Send Email️ </a></h2>
+                <h2>
+                    <a class="myButton" href="{% url 'invitations:event_add_task' event.pk %}">Back</a>
+                    <a class="myButton" href="{% url 'invitations:event_final' event.pk %}">Send Email️ </a>
+                </h2>
                 <div class="col-sm-1"></div>
             </div>
         </div>
