@@ -10,6 +10,8 @@ from invitations.views import (
     OrganizerView,
     StartView,
     TaskView,
+    add_attendee_form,
+    add_task_form,
 )
 
 app_name = "invitations"
@@ -27,6 +29,8 @@ urlpatterns = [
         name="event_add_attendee",
     ),
     path("event/<int:pk>/add_task/", TaskView.as_view(), name="event_add_task"),
+    path("add_attendee_form/", add_attendee_form, name="add_attendee_form"),
+    path("event/<int:pk>/add_task_form/", add_task_form, name="add_task_form"),
     path("event/<int:pk>/invite/", InviteView.as_view(), name="event_invite"),
     path("event/<int:pk>/final/", FinalView.as_view(), name="event_final"),
 ]

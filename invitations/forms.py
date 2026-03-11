@@ -29,7 +29,7 @@ class PersonForm(ModelForm):
         }
 
 
-PersonFormSet = formset_factory(PersonForm, extra=5)
+PersonFormSet = formset_factory(PersonForm, extra=2)
 
 
 class EventTaskForm(ModelForm):
@@ -56,4 +56,4 @@ class EventTaskForm(ModelForm):
         return instance
 
 
-EventTaskFormSet = formset_factory(EventTaskForm, extra=5)
+EventTaskFormSet = formset_factory(EventTaskForm, extra=2)

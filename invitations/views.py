@@ -1,9 +1,10 @@
 from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView, UpdateView
 
-from invitations.forms import EventForm, EventTaskFormSet, PersonFormSet
+from invitations.forms import EventForm, EventTaskForm, EventTaskFormSet, PersonForm, PersonFormSet
 from invitations.models import Event, EventAttendee, Person
 
 
@@ -185,5 +186,44 @@ class FinalView(EmailMixin, TemplateView):
         email.attach_alternative(html_content, "text/html")
         email.to = recipients
         email.send()
+
+
+def add_attendee_form(request):
+    """Returns a single attendee form row for htmx-powered dynamic addition.
+
+    Called via htmx GET when the user clicks '+' on the attendee step. Reads
+    the current formset size from the `form-TOTAL_FORMS` query parameter
+    (included automatically by htmx via hx-include), creates an unbound
+    PersonForm at that index, and returns a rendered partial containing the
+    new row plus an out-of-band swap to increment the management form counter
+    so Django accepts the extra data on POST.
+    """
+    index = int(request.GET.get("form-TOTAL_FORMS", 0))
+    form = PersonForm(prefix=f"form-{index}")
+    return render(request, "invitations/_attendee_row.html", {
+        "form": form,
+        "index": index + 1,
+        "new_total": index + 1,
+    })
+
+
+def add_task_form(request, pk):
+    """Returns a single task form row for htmx-powered dynamic addition.
+
+    Called via htmx GET when the user clicks '+' on the task step. Reads the
+    current formset size from the `form-TOTAL_FORMS` query parameter (included
+    automatically by htmx via hx-include), creates an unbound EventTaskForm at
+    that index, and returns a rendered partial containing the new row plus an
+    out-of-band swap to increment the management form counter so Django accepts
+    the extra data on POST. The event pk is required because EventTaskForm
+    needs it to save tasks to the correct event.
+    """
+    index = int(request.GET.get("form-TOTAL_FORMS", 0))
+    form = EventTaskForm(prefix=f"form-{index}", event=pk)
+    return render(request, "invitations/_task_row.html", {
+        "form": form,
+        "index": index + 1,
+        "new_total": index + 1,
+    })
 
 

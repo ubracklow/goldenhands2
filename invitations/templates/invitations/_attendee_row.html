@@ -1,0 +1,6 @@
+<div class="form-group">
+    <label class="col-sm-2 control-label">{{ index }}.</label>
+    <div class="col-sm-4">{{ form.name }}</div>
+    <div class="col-sm-5">{{ form.email }}</div>
+</div>
+<input type="hidden" name="form-TOTAL_FORMS" id="id_form-TOTAL_FORMS" value="{{ new_total }}" hx-swap-oob="true">

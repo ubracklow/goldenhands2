@@ -392,6 +392,63 @@ class TestInviteView:
         assert reverse("invitations:event_add_task", kwargs={"pk": self.event.pk}) in res.rendered_content
 
 
+class TestAddAttendeeFormView:
+    def test_returns_form_row_for_given_index(self, client):
+        url = reverse("invitations:add_attendee_form")
+        res = client.get(url, {"form-TOTAL_FORMS": "2"})
+        assert res.status_code == 200
+        assert 'name="form-2-name"' in res.content.decode()
+        assert 'name="form-2-email"' in res.content.decode()
+
+    def test_updates_total_forms_counter(self, client):
+        url = reverse("invitations:add_attendee_form")
+        res = client.get(url, {"form-TOTAL_FORMS": "2"})
+        assert 'value="3"' in res.content.decode()
+
+    def test_label_shows_correct_row_number(self, client):
+        url = reverse("invitations:add_attendee_form")
+        res = client.get(url, {"form-TOTAL_FORMS": "4"})
+        assert "5." in res.content.decode()
+
+    def test_defaults_to_index_zero_when_no_total_given(self, client):
+        url = reverse("invitations:add_attendee_form")
+        res = client.get(url)
+        assert res.status_code == 200
+        assert 'name="form-0-name"' in res.content.decode()
+
+
+@pytest.mark.django_db
+class TestAddTaskFormView:
+    @pytest.fixture(autouse=True)
+    def _setup_data(self, db):
+        organizer = Person.objects.create(name="Ute", email="my@mail.com")
+        self.event = Event.objects.create(
+            organizer=organizer, occasion="Foo", date=timezone.now(), location="Bar"
+        )
+
+    def test_returns_form_row_for_given_index(self, client):
+        url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
+        res = client.get(url, {"form-TOTAL_FORMS": "2"})
+        assert res.status_code == 200
+        assert 'name="form-2-task"' in res.content.decode()
+
+    def test_updates_total_forms_counter(self, client):
+        url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
+        res = client.get(url, {"form-TOTAL_FORMS": "2"})
+        assert 'value="3"' in res.content.decode()
+
+    def test_label_shows_correct_row_number(self, client):
+        url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
+        res = client.get(url, {"form-TOTAL_FORMS": "3"})
+        assert "Task 4" in res.content.decode()
+
+    def test_defaults_to_index_zero_when_no_total_given(self, client):
+        url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
+        res = client.get(url)
+        assert res.status_code == 200
+        assert 'name="form-0-task"' in res.content.decode()
+
+
 @pytest.mark.django_db
 class TestFinalView:
     @pytest.fixture(autouse=True)
