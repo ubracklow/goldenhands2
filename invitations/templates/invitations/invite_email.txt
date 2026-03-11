@@ -10,14 +10,14 @@ When: {{event.date}}
 To make the best out of the occasion, {{event.organizer.name}} needs your helping Golden Hands.
 {% if even_or_task_outnumber %}
 {% for t in tasks %}
-Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}.
+Lovely {{ t.attendee.person.name }}  - please bring/prepare {{ t.task }}.
 {% endfor %}
 {% else %}
 {% for t in tasks %}
-Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}.
+Lovely {{ t.attendee.person.name }}  - please bring/prepare {{ t.task }}.
 {% endfor %}
 {% for a in attendees_without_task %}
-Lovely {{ a.attendee.name }}  - please come as you are.
+Lovely {{ a.person.name }}  - please come as you are.
 {% endfor %}
 {% endif %}
 

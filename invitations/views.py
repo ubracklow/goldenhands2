@@ -80,8 +80,8 @@ class AttendeeView(FormView):
     def get_initial(self):
         event = Event.objects.get(pk=self.kwargs["pk"])
         return [
-            {"name": ea.attendee.name, "email": ea.attendee.email}
-            for ea in event.eventattendee_set.select_related("attendee").all()
+            {"name": ea.person.name, "email": ea.person.email}
+            for ea in event.eventattendee_set.select_related("person").all()
         ]
 
     def get_context_data(self, **kwargs):
@@ -91,13 +91,13 @@ class AttendeeView(FormView):
 
     def form_valid(self, form):
         self.event = Event.objects.get(pk=self.kwargs["pk"])
-        attendee_pks = list(self.event.eventattendee_set.values_list("attendee_id", flat=True))
+        attendee_pks = list(self.event.eventattendee_set.values_list("person_id", flat=True))
         self.event.eventattendee_set.all().delete()
         Person.objects.filter(pk__in=attendee_pks).delete()
         for data in form.cleaned_data:
             if data != {}:
                 person = Person.objects.create(name=data["name"], email=data["email"])
-                EventAttendee.objects.create(attendee=person, event=self.event)
+                EventAttendee.objects.create(person=person, event=self.event)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -146,7 +146,7 @@ class EmailMixin:
             context["tasks"] = tasks
         else:
             attendees = attendees.exclude(
-                attendee_id__in=tasks.values_list("attendee__attendee_id")
+                person_id__in=tasks.values_list("attendee__person_id")
             )
             context["tasks"] = tasks
             context["attendees_without_task"] = attendees
@@ -186,7 +186,7 @@ class FinalView(EmailMixin, TemplateView):
             self.event.organizer.email,
         ]
         for a in self.event.eventattendee_set.all():
-            recipients.append(a.attendee.email)
+            recipients.append(a.person.email)
         email = EmailMultiAlternatives("An invitation for you", text_content)
         email.attach_alternative(html_content, "text/html")
         email.to = recipients

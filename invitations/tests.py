@@ -17,8 +17,8 @@ class TestModels:
         self.event = Event.objects.create(
             organizer=organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
-        EventAttendee.objects.create(event=self.event, attendee=person1)
-        EventAttendee.objects.create(event=self.event, attendee=person2)
+        EventAttendee.objects.create(event=self.event, person=person1)
+        EventAttendee.objects.create(event=self.event, person=person2)
         EventTask.objects.create(event=self.event, task="Wine")
         EventTask.objects.create(event=self.event, task="Chocolate Cake")
 
@@ -26,14 +26,14 @@ class TestModels:
         self.event.assign_attendee_tasks()
         for t in EventTask.objects.all():
             assert t.attendee
-        attendees = EventAttendee.objects.values_list("attendee__name")
-        assignments = EventTask.objects.values_list("attendee__attendee__name")
+        attendees = EventAttendee.objects.values_list("person__name")
+        assignments = EventTask.objects.values_list("attendee__person__name")
         for a in attendees:
             assert a in assignments
 
     def test_assign_attendees_outnumber_tasks(self):
         person3 = Person.objects.create(name="Judith", email="another@mail.com")
-        EventAttendee.objects.create(event=self.event, attendee=person3)
+        EventAttendee.objects.create(event=self.event, person=person3)
         self.event.assign_attendee_tasks()
         for t in EventTask.objects.all():
             assert t.attendee
@@ -219,7 +219,7 @@ class TestAttendeeView:
 
     def test_get_prefills_existing_attendees(self, client):
         person1 = Person.objects.create(name="Thea", email="thea@mail.com")
-        EventAttendee.objects.create(event=self.event, attendee=person1)
+        EventAttendee.objects.create(event=self.event, person=person1)
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
@@ -228,7 +228,7 @@ class TestAttendeeView:
 
     def test_post_replaces_attendees(self, client):
         person1 = Person.objects.create(name="Thea", email="thea@mail.com")
-        EventAttendee.objects.create(event=self.event, attendee=person1)
+        EventAttendee.objects.create(event=self.event, person=person1)
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
         data = {
             "form-TOTAL_FORMS": "1",
@@ -239,12 +239,12 @@ class TestAttendeeView:
         }
         client.post(url, data)
         assert EventAttendee.objects.count() == 1
-        assert EventAttendee.objects.first().attendee.name == "NewGuest"
+        assert EventAttendee.objects.first().person.name == "NewGuest"
         assert not Person.objects.filter(name="Thea").exists()
 
     def test_post_preserves_tasks_with_null_attendee(self, client):
         person1 = Person.objects.create(name="Thea", email="thea@mail.com")
-        ea = EventAttendee.objects.create(event=self.event, attendee=person1)
+        ea = EventAttendee.objects.create(event=self.event, person=person1)
         task = EventTask.objects.create(event=self.event, task="Wine", attendee=ea)
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
         data = {
@@ -276,8 +276,8 @@ class TestEventTaskView:
         self.event = Event.objects.create(
             organizer=self.organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
-        EventAttendee.objects.create(event=self.event, attendee=self.person1)
-        EventAttendee.objects.create(event=self.event, attendee=self.person2)
+        EventAttendee.objects.create(event=self.event, person=self.person1)
+        EventAttendee.objects.create(event=self.event, person=self.person2)
 
     def test_post_creates_tasks(self, client):
         assert len(EventTask.objects.all()) == 0
@@ -339,8 +339,8 @@ class TestInviteView:
         self.event = Event.objects.create(
             organizer=organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
-        EventAttendee.objects.create(event=self.event, attendee=person1)
-        EventAttendee.objects.create(event=self.event, attendee=person2)
+        EventAttendee.objects.create(event=self.event, person=person1)
+        EventAttendee.objects.create(event=self.event, person=person2)
         EventTask.objects.create(event=self.event, task="Wine")
         EventTask.objects.create(event=self.event, task="Chocolate Cake")
 
@@ -351,7 +351,7 @@ class TestInviteView:
         assert response.status_code == 200
         assert self.event.organizer.name in response.rendered_content
         for a in self.event.eventattendee_set.all():
-            assert a.attendee.name in response.rendered_content
+            assert a.person.name in response.rendered_content
         for t in self.event.eventtask_set.all():
             assert t.task in response.rendered_content
         assert (
@@ -361,14 +361,14 @@ class TestInviteView:
 
     def test_get_attendees_outnumber_tasks(self, client):
         person3 = Person.objects.create(name="Judith", email="another@mail.com")
-        EventAttendee.objects.create(event=self.event, attendee=person3)
+        EventAttendee.objects.create(event=self.event, person=person3)
         self.event.assign_attendee_tasks()
         url = reverse("invitations:event_invite", kwargs={"pk": self.event.pk})
         response = client.get(url)
         assert response.status_code == 200
         assert self.event.organizer.name in response.rendered_content
         for a in self.event.eventattendee_set.all():
-            assert a.attendee.name in response.rendered_content
+            assert a.person.name in response.rendered_content
         for t in self.event.eventtask_set.all():
             assert t.task in response.rendered_content
 
@@ -380,7 +380,7 @@ class TestInviteView:
         assert response.status_code == 200
         assert self.event.organizer.name in response.rendered_content
         for a in self.event.eventattendee_set.all():
-            assert a.attendee.name in response.rendered_content
+            assert a.person.name in response.rendered_content
         for t in self.event.eventtask_set.all():
             assert t.task in response.rendered_content
 
@@ -402,8 +402,8 @@ class TestFinalView:
         self.event = Event.objects.create(
             organizer=organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
-        EventAttendee.objects.create(event=self.event, attendee=person1)
-        EventAttendee.objects.create(event=self.event, attendee=person2)
+        EventAttendee.objects.create(event=self.event, person=person1)
+        EventAttendee.objects.create(event=self.event, person=person2)
         EventTask.objects.create(event=self.event, task="Wine")
         EventTask.objects.create(event=self.event, task="Chocolate Cake")
         self.event.assign_attendee_tasks()
@@ -416,8 +416,8 @@ class TestFinalView:
         assert self.event.organizer.email in email.to
         assert self.event.organizer.email in email.body
         for a in self.event.eventattendee_set.all():
-            assert a.attendee.email in email.to
-            assert a.attendee.name in email.body
+            assert a.person.email in email.to
+            assert a.person.name in email.body
 
     def test_get_sends_email(self, client):
         url = reverse("invitations:event_final", kwargs={"pk": self.event.pk})
