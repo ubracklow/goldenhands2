@@ -14,7 +14,7 @@ class StartView(TemplateView):
 
 class OrganizerFormMixin:
     model = Person
-    fields = ["name", "email"]
+    form_class = PersonForm
     template_name = "invitations/organizer.html"
 
 

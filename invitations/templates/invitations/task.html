@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'invitations/base.html' %}
+{% load crispy_forms_tags %}
 
     {% block content %}
         <div class="container">
@@ -16,14 +17,7 @@
                         {{ form.management_form }}
                         <div id="task-forms">
                         {% for f in form %}
-                        <div class="form-group {% if f.task.errors %}has-error{% endif %}">
-                            <label class="col-sm-3 control-label">Task {{ forloop.counter }}</label>
-                            <div class="col-sm-7">
-                                {{ f.task }}
-                                {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
-                                {% if f.task.errors %}<p class="help-block">{{ f.task.errors }}</p>{% endif %}
-                            </div>
-                        </div>
+                        {% crispy f %}
                         {% endfor %}
                         </div>
 

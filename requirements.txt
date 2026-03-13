@@ -1,6 +1,7 @@
 django>=5.1,<6.0
 dj-database-url>=2.1.0
-django-bootstrap-datepicker-plus
+django-crispy-forms>=2.3
+crispy-bootstrap3>=2024.1
 gunicorn>=23.0.0
 psycopg2-binary>=2.9.0
 whitenoise>=6.0.0
