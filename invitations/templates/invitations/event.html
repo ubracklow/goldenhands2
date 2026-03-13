@@ -1,24 +1,39 @@
-<!DOCTYPE html>
 {% extends 'invitations/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block extrahead %}
 {{ form.media }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 {% endblock %}
 
-    {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-2"></div>
-                <div class="col-sm-9">
-                    <h2>Step 2 - What's the occasion?</h2>
-                    <br>
-                    <form  id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                    <input class="myButton" id="submit" type="submit" value="Next Step - Who are you inviting?">
-                    </form>
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-offset-1 col-sm-10">
+            <h3>Step 2 - What's the occasion?</h3>
+            <br>
+            <form class="form-horizontal" action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% crispy form %}
+                <div class="form-group">
+                    <div class="col-sm-offset-3 col-sm-7">
+                        <a class="myButton" href="{{ back_url }}">Back</a>
+                        <input class="myButton" id="submit" type="submit" value="Next Step - Who are you inviting?">
+                    </div>
                 </div>
-            <div class="col-sm-1"></div>
+            </form>
+            <p><small>Address search powered by <a href="https://nominatim.openstreetmap.org">Nominatim</a> / OpenStreetMap contributors</small></p>
         </div>
     </div>
-    {% endblock %}
+</div>
+<script>
+$(function () {
+    $('#id_date').datetimepicker({
+        format: 'DD/MM/YYYY HH:mm'
+    });
+    $('#div_id_date .input-group-btn, #div_id_date .input-group-addon:last-child').hide();
+});
+</script>
+{% endblock %}

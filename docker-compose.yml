@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   goldenhands:
     build: .
@@ -13,7 +11,7 @@ services:
     depends_on:
       - goldenhands-db
   goldenhands-db:
-    image: postgres:12.0-alpine
+    image: postgres:17-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:

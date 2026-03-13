@@ -16,14 +16,14 @@
     <p>To make the best out of the occasion, {{event.organizer.name}} needs your helping Golden Hands.</p><br>
        {% if even_or_task_outnumber %}
         {% for t in tasks %}
-            <p>Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}. </p>
+            <p>Lovely {{ t.attendee.person.name }}  - please bring/prepare {{ t.task }}. </p>
         {% endfor %}
     {% else %}
         {% for t in tasks %}
-            <p>Lovely {{ t.attendee.attendee.name }}  - please bring/prepare {{ t.task }}. </p>
+            <p>Lovely {{ t.attendee.person.name }}  - please bring/prepare {{ t.task }}. </p>
         {% endfor %}
         {% for a in attendees_without_task %}
-            <p>Lovely {{ a.attendee.name }}  - please come as you are. </p>
+            <p>Lovely {{ a.person.name }}  - please come as you are. </p>
         {% endfor %}
     {% endif %}
    <br>

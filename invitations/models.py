@@ -12,10 +12,10 @@ class Person(models.Model):
 
 
 class Event(models.Model):
-    organizer = models.ForeignKey(Person, on_delete=models.CASCADE)
-    occasion = models.TextField()
+    organizer = models.ForeignKey(Person, on_delete=models.PROTECT)
+    occasion = models.CharField(max_length=255)
     date = models.DateTimeField()
-    location = models.TextField()
+    location = models.CharField(max_length=500)
 
     def __str__(self):
         return f"{self.organizer.name} - {self.occasion}"
@@ -34,18 +34,18 @@ class Event(models.Model):
 
 
 class EventAttendee(models.Model):
-    attendee = models.ForeignKey(Person, on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.attendee_id} - {self.event.occasion}"
+        return f"{self.person_id} - {self.event.occasion}"
 
 
 class EventTask(models.Model):
     task = models.CharField(max_length=255)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     attendee = models.ForeignKey(
-        EventAttendee, on_delete=models.CASCADE, blank=True, null=True
+        EventAttendee, on_delete=models.SET_NULL, blank=True, null=True
     )
 
     def __str__(self):

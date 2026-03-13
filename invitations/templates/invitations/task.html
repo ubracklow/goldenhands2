@@ -1,27 +1,43 @@
 <!DOCTYPE html>
 {% extends 'invitations/base.html' %}
+{% load crispy_forms_tags %}
 
     {% block content %}
         <div class="container">
             <div class="row">
-                <div class="col-sm-2"></div>
-                <div class="col-sm-9">
-                    <h2>Step 4 - What else do we need?</h2>
+                <div class="col-sm-offset-1 col-sm-10">
+                    <h3>Step 4 - What else do we need?</h3>
                     <br>
                     <h4>What would you like people to bring? Snacks, Drinks, Decoration, Equipment...</h4>
                     <br>
                     <h4>The items or tasks you add here will be assigned by the magic hand of fate among your guests.</h4>
                     <br>
-                    <form id="user_form" class="form" action="" method="POST" enctype="multipart/form-data">
+                    <form id="user_form" class="form-horizontal" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form.management_form }}
+                        <div id="task-forms">
                         {% for f in form %}
-                            {{ f }}<br><br>
+                        {% crispy f %}
                         {% endfor %}
-                        <input class="myButton" id="submit" type="submit" value="Final Step - Review and send the invitation">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-7">
+                                <button type="button" class="myButton"
+                                    hx-get="{% url 'invitations:add_task_form' pk %}"
+                                    hx-target="#task-forms"
+                                    hx-swap="beforeend"
+                                    hx-include="[name='form-TOTAL_FORMS']">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-7">
+                                <a class="myButton" href="{% url 'invitations:event_add_attendee' pk %}">Back</a>
+                                <input class="myButton" id="submit" type="submit" value="Final Step - Review and send the invitation">
+                            </div>
+                        </div>
                     </form>
                 </div>
-            <div class="col-sm-1"></div>
-        </div>
+            </div>
         </div>
     {% endblock %}
