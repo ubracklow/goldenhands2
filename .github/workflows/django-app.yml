@@ -13,8 +13,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the stack
-      run: docker-compose -f docker-compose.override.github-actions.yml up -d
+      run: docker compose -f docker-compose.override.github-actions.yml up -d
     - name: Lint with ruff
-      run: docker-compose -f docker-compose.override.github-actions.yml exec -T goldenhands ruff check .
+      run: docker compose -f docker-compose.override.github-actions.yml exec -T goldenhands ruff check .
     - name: Test with pytest
-      run: docker-compose -f docker-compose.override.github-actions.yml exec -T goldenhands pytest
+      run: docker compose -f docker-compose.override.github-actions.yml exec -T goldenhands pytest
