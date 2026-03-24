@@ -1,12 +1,22 @@
+from typing import Any
+
 from django.forms import TextInput
+from django.forms.renderers import BaseRenderer
 from django.utils.html import format_html
+from django.utils.safestring import SafeString
 
 
 class LocationAutocompleteWidget(TextInput):
     class Media:
         js = ('js/location_autocomplete.js',)
 
-    def render(self, name, value, attrs=None, renderer=None):
+    def render(
+        self,
+        name: str,
+        value: str | None,
+        attrs: dict[str, Any] | None = None,
+        renderer: BaseRenderer | None = None,
+    ) -> SafeString:
         attrs = attrs or {}
         input_id = attrs.get('id', f'id_{name}')
         list_id = f'{input_id}_suggestions'
