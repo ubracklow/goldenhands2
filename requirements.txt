@@ -9,3 +9,4 @@ pytest-cov>=6.0.0
 pytest-django>=4.9.0
 pytest>=8.0.0
 ruff>=0.4.0
+django-stubs[compatible-mypy]>=5.1.0

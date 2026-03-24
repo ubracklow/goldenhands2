@@ -10,6 +10,8 @@ services:
       - 8000:8000
     env_file:
       - ./.env.github
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       - goldenhands-db
   goldenhands-db:

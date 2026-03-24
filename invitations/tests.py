@@ -10,7 +10,7 @@ from invitations.views import FinalView
 @pytest.mark.django_db
 class TestModels:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         person1 = Person.objects.create(name="Thea", email="your@mail.com")
         person2 = Person.objects.create(name="Stefan", email="their@mail.com")
@@ -22,7 +22,7 @@ class TestModels:
         EventTask.objects.create(event=self.event, task="Wine")
         EventTask.objects.create(event=self.event, task="Chocolate Cake")
 
-    def test_assign_attendee_tasks_even_numbers(self):
+    def test_assign_attendee_tasks_even_numbers(self) -> None:
         self.event.assign_attendee_tasks()
         for t in EventTask.objects.all():
             assert t.attendee
@@ -31,14 +31,14 @@ class TestModels:
         for a in attendees:
             assert a in assignments
 
-    def test_assign_attendees_outnumber_tasks(self):
+    def test_assign_attendees_outnumber_tasks(self) -> None:
         person3 = Person.objects.create(name="Judith", email="another@mail.com")
         EventAttendee.objects.create(event=self.event, person=person3)
         self.event.assign_attendee_tasks()
         for t in EventTask.objects.all():
             assert t.attendee
 
-    def test_assign_tasks_outnumber_attendees(self):
+    def test_assign_tasks_outnumber_attendees(self) -> None:
         EventTask.objects.create(event=self.event, task="Salad")
         self.event.assign_attendee_tasks()
         for t in EventTask.objects.all():
@@ -46,7 +46,7 @@ class TestModels:
 
 
 class TestStartView:
-    def test_get(self, client):
+    def test_get(self, client) -> None:
         url = reverse("invitations:start")
         res = client.get(url)
         assert res.status_code == 200
@@ -55,13 +55,14 @@ class TestStartView:
 
 @pytest.mark.django_db
 class TestOrganizerView:
-    def test_post(self, client):
+    def test_post(self, client) -> None:
         assert len(Person.objects.all()) == 0
         url = reverse("invitations:organizer_create")
         res = client.post(url, data={"name": "Ute", "email": "me@foo.com"})
         assert res.status_code == 302
         assert len(Person.objects.all()) == 1
         organizer = Person.objects.first()
+        assert organizer is not None
         assert res.url == reverse(
             "invitations:event_create", kwargs={"pk": organizer.pk}
         )
@@ -70,20 +71,20 @@ class TestOrganizerView:
 @pytest.mark.django_db
 class TestOrganizerEditView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         self.organizer = Person.objects.create(name="Ute", email="my@mail.com")
         self.event = Event.objects.create(
             organizer=self.organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
 
-    def test_get_prefills_form(self, client):
+    def test_get_prefills_form(self, client) -> None:
         url = reverse("invitations:organizer_edit", kwargs={"pk": self.organizer.pk})
         res = client.get(url)
         assert res.status_code == 200
         assert self.organizer.name in res.rendered_content
         assert self.organizer.email in res.rendered_content
 
-    def test_post_updates_person(self, client):
+    def test_post_updates_person(self, client) -> None:
         url = reverse("invitations:organizer_edit", kwargs={"pk": self.organizer.pk})
         client.post(url, data={"name": "Updated Name", "email": "new@mail.com"})
         assert Person.objects.count() == 1
@@ -91,13 +92,13 @@ class TestOrganizerEditView:
         assert self.organizer.name == "Updated Name"
         assert self.organizer.email == "new@mail.com"
 
-    def test_redirects_to_event_edit_when_event_exists(self, client):
+    def test_redirects_to_event_edit_when_event_exists(self, client) -> None:
         url = reverse("invitations:organizer_edit", kwargs={"pk": self.organizer.pk})
         res = client.post(url, data={"name": "Ute", "email": "my@mail.com"})
         assert res.status_code == 302
         assert res.url == reverse("invitations:event_edit", kwargs={"pk": self.event.pk})
 
-    def test_redirects_to_event_create_when_no_event(self, client):
+    def test_redirects_to_event_create_when_no_event(self, client) -> None:
         self.event.delete()
         url = reverse("invitations:organizer_edit", kwargs={"pk": self.organizer.pk})
         res = client.post(url, data={"name": "Ute", "email": "my@mail.com"})
@@ -107,7 +108,7 @@ class TestOrganizerEditView:
 
 @pytest.mark.django_db
 class TestEventView:
-    def test_post_sets_organizer(self, client):
+    def test_post_sets_organizer(self, client) -> None:
         assert len(Event.objects.all()) == 0
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         url = reverse("invitations:event_create", kwargs={"pk": organizer.pk})
@@ -118,13 +119,14 @@ class TestEventView:
         }
         res = client.post(url, data=data)
         event = Event.objects.first()
+        assert event is not None
         assert res.status_code == 302
         assert res.url == reverse(
             "invitations:event_add_attendee", kwargs={"pk": event.pk}
         )
         assert event.organizer == organizer
 
-    def test_has_back_button(self, client):
+    def test_has_back_button(self, client) -> None:
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         url = reverse("invitations:event_create", kwargs={"pk": organizer.pk})
         res = client.get(url)
@@ -135,20 +137,20 @@ class TestEventView:
 @pytest.mark.django_db
 class TestEventEditView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         self.organizer = Person.objects.create(name="Ute", email="my@mail.com")
         self.event = Event.objects.create(
             organizer=self.organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
 
-    def test_get_prefills_form(self, client):
+    def test_get_prefills_form(self, client) -> None:
         url = reverse("invitations:event_edit", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
         assert self.event.occasion in res.rendered_content
         assert self.event.location in res.rendered_content
 
-    def test_post_updates_event(self, client):
+    def test_post_updates_event(self, client) -> None:
         url = reverse("invitations:event_edit", kwargs={"pk": self.event.pk})
         data = {
             "occasion": "Updated Occasion",
@@ -161,7 +163,7 @@ class TestEventEditView:
         assert self.event.occasion == "Updated Occasion"
         assert self.event.location == "New Location"
 
-    def test_redirects_to_add_attendee(self, client):
+    def test_redirects_to_add_attendee(self, client) -> None:
         url = reverse("invitations:event_edit", kwargs={"pk": self.event.pk})
         data = {
             "occasion": "Foo",
@@ -172,7 +174,7 @@ class TestEventEditView:
         assert res.status_code == 302
         assert res.url == reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
 
-    def test_has_back_button(self, client):
+    def test_has_back_button(self, client) -> None:
         url = reverse("invitations:event_edit", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
@@ -182,13 +184,13 @@ class TestEventEditView:
 @pytest.mark.django_db
 class TestAttendeeView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         self.organizer = Person.objects.create(name="Ute", email="my@mail.com")
         self.event = Event.objects.create(
             organizer=self.organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
 
-    def test_post_creates_person_and_attendee(self, client):
+    def test_post_creates_person_and_attendee(self, client) -> None:
         assert len(Person.objects.all()) == 1
         assert len(EventAttendee.objects.all()) == 0
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
@@ -217,7 +219,7 @@ class TestAttendeeView:
             "invitations:event_add_task", kwargs={"pk": self.event.pk}
         )
 
-    def test_get_prefills_existing_attendees(self, client):
+    def test_get_prefills_existing_attendees(self, client) -> None:
         person1 = Person.objects.create(name="Thea", email="thea@mail.com")
         EventAttendee.objects.create(event=self.event, person=person1)
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
@@ -226,7 +228,7 @@ class TestAttendeeView:
         assert "Thea" in res.rendered_content
         assert "thea@mail.com" in res.rendered_content
 
-    def test_post_replaces_attendees(self, client):
+    def test_post_replaces_attendees(self, client) -> None:
         person1 = Person.objects.create(name="Thea", email="thea@mail.com")
         EventAttendee.objects.create(event=self.event, person=person1)
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
@@ -238,11 +240,13 @@ class TestAttendeeView:
             "form-0-email": "new@mail.com",
         }
         client.post(url, data)
+        first_attendee = EventAttendee.objects.first()
         assert EventAttendee.objects.count() == 1
-        assert EventAttendee.objects.first().person.name == "NewGuest"
+        assert first_attendee is not None
+        assert first_attendee.person.name == "NewGuest"
         assert not Person.objects.filter(name="Thea").exists()
 
-    def test_post_preserves_tasks_with_null_attendee(self, client):
+    def test_post_preserves_tasks_with_null_attendee(self, client) -> None:
         person1 = Person.objects.create(name="Thea", email="thea@mail.com")
         ea = EventAttendee.objects.create(event=self.event, person=person1)
         task = EventTask.objects.create(event=self.event, task="Wine", attendee=ea)
@@ -259,7 +263,7 @@ class TestAttendeeView:
         assert EventTask.objects.filter(pk=task.pk).exists()
         assert task.attendee is None
 
-    def test_has_back_button(self, client):
+    def test_has_back_button(self, client) -> None:
         url = reverse("invitations:event_add_attendee", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
@@ -269,7 +273,7 @@ class TestAttendeeView:
 @pytest.mark.django_db
 class TestEventTaskView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         self.organizer = Person.objects.create(name="Ute", email="my@mail.com")
         self.person1 = Person.objects.create(name="Thea", email="your@mail.com")
         self.person2 = Person.objects.create(name="Stefan", email="their@mail.com")
@@ -279,7 +283,7 @@ class TestEventTaskView:
         EventAttendee.objects.create(event=self.event, person=self.person1)
         EventAttendee.objects.create(event=self.event, person=self.person2)
 
-    def test_post_creates_tasks(self, client):
+    def test_post_creates_tasks(self, client) -> None:
         assert len(EventTask.objects.all()) == 0
         url = reverse("invitations:event_add_task", kwargs={"pk": self.event.pk})
         res = client.get(url)
@@ -302,14 +306,14 @@ class TestEventTaskView:
             "invitations:event_invite", kwargs={"pk": self.event.pk}
         )
 
-    def test_get_prefills_existing_tasks(self, client):
+    def test_get_prefills_existing_tasks(self, client) -> None:
         EventTask.objects.create(event=self.event, task="Wine")
         url = reverse("invitations:event_add_task", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
         assert "Wine" in res.rendered_content
 
-    def test_post_replaces_tasks(self, client):
+    def test_post_replaces_tasks(self, client) -> None:
         EventTask.objects.create(event=self.event, task="Wine")
         url = reverse("invitations:event_add_task", kwargs={"pk": self.event.pk})
         data = {
@@ -319,10 +323,12 @@ class TestEventTaskView:
             "form-0-task": "Cake",
         }
         client.post(url, data)
+        first_task = EventTask.objects.first()
         assert EventTask.objects.count() == 1
-        assert EventTask.objects.first().task == "Cake"
+        assert first_task is not None
+        assert first_task.task == "Cake"
 
-    def test_has_back_button(self, client):
+    def test_has_back_button(self, client) -> None:
         url = reverse("invitations:event_add_task", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
@@ -332,7 +338,7 @@ class TestEventTaskView:
 @pytest.mark.django_db
 class TestInviteView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         person1 = Person.objects.create(name="Thea", email="your@mail.com")
         person2 = Person.objects.create(name="Stefan", email="their@mail.com")
@@ -344,7 +350,7 @@ class TestInviteView:
         EventTask.objects.create(event=self.event, task="Wine")
         EventTask.objects.create(event=self.event, task="Chocolate Cake")
 
-    def test_get_even_numbers_guests_and_tasks(self, client):
+    def test_get_even_numbers_guests_and_tasks(self, client) -> None:
         self.event.assign_attendee_tasks()
         url = reverse("invitations:event_invite", kwargs={"pk": self.event.pk})
         response = client.get(url)
@@ -359,7 +365,7 @@ class TestInviteView:
             in response.rendered_content
         )
 
-    def test_get_attendees_outnumber_tasks(self, client):
+    def test_get_attendees_outnumber_tasks(self, client) -> None:
         person3 = Person.objects.create(name="Judith", email="another@mail.com")
         EventAttendee.objects.create(event=self.event, person=person3)
         self.event.assign_attendee_tasks()
@@ -372,7 +378,7 @@ class TestInviteView:
         for t in self.event.eventtask_set.all():
             assert t.task in response.rendered_content
 
-    def test_get_tasks_outnumber_attendees(self, client):
+    def test_get_tasks_outnumber_attendees(self, client) -> None:
         EventTask.objects.create(event=self.event, task="Salad")
         self.event.assign_attendee_tasks()
         url = reverse("invitations:event_invite", kwargs={"pk": self.event.pk})
@@ -384,7 +390,7 @@ class TestInviteView:
         for t in self.event.eventtask_set.all():
             assert t.task in response.rendered_content
 
-    def test_has_back_button(self, client):
+    def test_has_back_button(self, client) -> None:
         self.event.assign_attendee_tasks()
         url = reverse("invitations:event_invite", kwargs={"pk": self.event.pk})
         res = client.get(url)
@@ -393,24 +399,24 @@ class TestInviteView:
 
 
 class TestAddAttendeeFormView:
-    def test_returns_form_row_for_given_index(self, client):
+    def test_returns_form_row_for_given_index(self, client) -> None:
         url = reverse("invitations:add_attendee_form")
         res = client.get(url, {"form-TOTAL_FORMS": "2"})
         assert res.status_code == 200
         assert 'name="form-2-name"' in res.content.decode()
         assert 'name="form-2-email"' in res.content.decode()
 
-    def test_updates_total_forms_counter(self, client):
+    def test_updates_total_forms_counter(self, client) -> None:
         url = reverse("invitations:add_attendee_form")
         res = client.get(url, {"form-TOTAL_FORMS": "2"})
         assert 'value="3"' in res.content.decode()
 
-    def test_label_shows_correct_row_number(self, client):
+    def test_label_shows_correct_row_number(self, client) -> None:
         url = reverse("invitations:add_attendee_form")
         res = client.get(url, {"form-TOTAL_FORMS": "4"})
         assert "5." in res.content.decode()
 
-    def test_defaults_to_index_zero_when_no_total_given(self, client):
+    def test_defaults_to_index_zero_when_no_total_given(self, client) -> None:
         url = reverse("invitations:add_attendee_form")
         res = client.get(url)
         assert res.status_code == 200
@@ -420,29 +426,29 @@ class TestAddAttendeeFormView:
 @pytest.mark.django_db
 class TestAddTaskFormView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         self.event = Event.objects.create(
             organizer=organizer, occasion="Foo", date=timezone.now(), location="Bar"
         )
 
-    def test_returns_form_row_for_given_index(self, client):
+    def test_returns_form_row_for_given_index(self, client) -> None:
         url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
         res = client.get(url, {"form-TOTAL_FORMS": "2"})
         assert res.status_code == 200
         assert 'name="form-2-task"' in res.content.decode()
 
-    def test_updates_total_forms_counter(self, client):
+    def test_updates_total_forms_counter(self, client) -> None:
         url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
         res = client.get(url, {"form-TOTAL_FORMS": "2"})
         assert 'value="3"' in res.content.decode()
 
-    def test_label_is_rendered(self, client):
+    def test_label_is_rendered(self, client) -> None:
         url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
         res = client.get(url, {"form-TOTAL_FORMS": "3"})
         assert "Task" in res.content.decode()
 
-    def test_defaults_to_index_zero_when_no_total_given(self, client):
+    def test_defaults_to_index_zero_when_no_total_given(self, client) -> None:
         url = reverse("invitations:add_task_form", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert res.status_code == 200
@@ -452,7 +458,7 @@ class TestAddTaskFormView:
 @pytest.mark.django_db
 class TestFinalView:
     @pytest.fixture(autouse=True)
-    def _setup_data(self, db):
+    def _setup_data(self, db) -> None:
         organizer = Person.objects.create(name="Ute", email="my@mail.com")
         person1 = Person.objects.create(name="Thea", email="your@mail.com")
         person2 = Person.objects.create(name="Stefan", email="their@mail.com")
@@ -465,7 +471,7 @@ class TestFinalView:
         EventTask.objects.create(event=self.event, task="Chocolate Cake")
         self.event.assign_attendee_tasks()
 
-    def test_send_email(self):
+    def test_send_email(self) -> None:
         view = FinalView()
         view.event = self.event
         view.send_email()
@@ -476,7 +482,7 @@ class TestFinalView:
             assert a.person.email in email.to
             assert a.person.name in email.body
 
-    def test_get_sends_email(self, client):
+    def test_get_sends_email(self, client) -> None:
         url = reverse("invitations:event_final", kwargs={"pk": self.event.pk})
         res = client.get(url)
         assert self.event.occasion in res.rendered_content

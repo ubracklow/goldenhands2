@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 from crispy_forms.bootstrap import PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -64,15 +66,15 @@ class EventTaskForm(ModelForm):
     helper.label_class = "col-sm-3"
     helper.field_class = "col-sm-7"
 
-    def __init__(self, *args, **kwargs):
-        event_pk = kwargs.pop("event")
-        self.event = Event.objects.get(pk=event_pk)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        event_pk: int = kwargs.pop("event")
+        self.event: Event = Event.objects.get(pk=event_pk)
         super().__init__(*args, **kwargs)
 
-    def save(self, commit=True):
+    def save(self, commit: bool = True) -> EventTask | None:
         if self.cleaned_data == {}:
-            return
-        instance = super().save(commit=False)
+            return None
+        instance = cast(EventTask, super().save(commit=False))
         instance.event = self.event
         instance.save()
         return instance

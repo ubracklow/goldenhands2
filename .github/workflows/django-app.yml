@@ -16,5 +16,7 @@ jobs:
       run: docker compose -f docker-compose.override.github-actions.yml up -d
     - name: Lint with ruff
       run: docker compose -f docker-compose.override.github-actions.yml exec -T goldenhands ruff check .
+    - name: Type-check with mypy
+      run: docker compose -f docker-compose.override.github-actions.yml exec -T goldenhands mypy invitations goldenhands
     - name: Test with pytest
       run: docker compose -f docker-compose.override.github-actions.yml exec -T goldenhands pytest

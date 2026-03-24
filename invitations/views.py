@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+from typing import Any, ClassVar
+
 from django.core.mail import EmailMultiAlternatives
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView, UpdateView
+from django.views.generic.edit import ModelFormMixin
 
 from invitations.forms import EventForm, EventTaskForm, EventTaskFormSet, PersonForm, PersonFormSet
 from invitations.models import Event, EventAttendee, Person
@@ -12,79 +18,84 @@ class StartView(TemplateView):
     template_name = "invitations/start.html"
 
 
-class OrganizerFormMixin:
+class OrganizerFormMixin(ModelFormMixin[Person, PersonForm]):
     model = Person
     form_class = PersonForm
-    template_name = "invitations/organizer.html"
+    template_name: ClassVar[str | None] = "invitations/organizer.html"
 
 
 class OrganizerView(OrganizerFormMixin, CreateView):
-    def get_success_url(self):
-        return reverse_lazy("invitations:event_create", kwargs={"pk": self.object.pk})
+    def get_success_url(self) -> str:
+        assert self.object is not None
+        return str(reverse_lazy("invitations:event_create", kwargs={"pk": self.object.pk}))
 
 
 class OrganizerEditView(OrganizerFormMixin, UpdateView):
-    def get_success_url(self):
+    def get_success_url(self) -> str:
+        assert self.object is not None
         event = Event.objects.filter(organizer=self.object).first()
         if event:
-            return reverse_lazy("invitations:event_edit", kwargs={"pk": event.pk})
-        return reverse_lazy("invitations:event_create", kwargs={"pk": self.object.pk})
+            return str(reverse_lazy("invitations:event_edit", kwargs={"pk": event.pk}))
+        return str(reverse_lazy("invitations:event_create", kwargs={"pk": self.object.pk}))
 
 
-class EventFormMixin:
+class EventFormMixin(ModelFormMixin[Event, EventForm]):
     form_class = EventForm
-    template_name = "invitations/event.html"
+    template_name: ClassVar[str | None] = "invitations/event.html"
 
 
 class EventCreateView(EventFormMixin, CreateView):
-    def form_valid(self, form):
+    def form_valid(self, form: EventForm) -> HttpResponse:
         form.instance.organizer = Person.objects.get(pk=self.kwargs["pk"])
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["back_url"] = reverse("invitations:organizer_edit", kwargs={"pk": self.kwargs["pk"]})
         return context
 
-    def get_success_url(self):
-        return reverse_lazy(
+    def get_success_url(self) -> str:
+        assert self.object is not None
+        return str(reverse_lazy(
             "invitations:event_add_attendee", kwargs={"pk": self.object.pk}
-        )
+        ))
 
 
 class EventEditView(EventFormMixin, UpdateView):
     model = Event
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        assert self.object is not None
         context = super().get_context_data(**kwargs)
         context["back_url"] = reverse("invitations:organizer_edit", kwargs={"pk": self.object.organizer.pk})
         return context
 
-    def get_success_url(self):
-        return reverse_lazy(
+    def get_success_url(self) -> str:
+        assert self.object is not None
+        return str(reverse_lazy(
             "invitations:event_add_attendee", kwargs={"pk": self.object.pk}
-        )
+        ))
 
 
 class AttendeeView(FormView):
     template_name = "invitations/attendee.html"
     model = Person
     form_class = PersonFormSet
-    event = None
+    event: Event | None = None
 
-    def get_initial(self):
+    def get_initial(self) -> list[dict[str, str]]:  # type: ignore[override]
         event = Event.objects.get(pk=self.kwargs["pk"])
         return [
             {"name": ea.person.name, "email": ea.person.email}
             for ea in event.eventattendee_set.select_related("person").all()
         ]
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["pk"] = self.kwargs["pk"]
         return context
 
-    def form_valid(self, form):
+    def form_valid(self, form: Any) -> HttpResponse:
         self.event = Event.objects.get(pk=self.kwargs["pk"])
         attendee_pks = list(self.event.eventattendee_set.values_list("person_id", flat=True))
         self.event.eventattendee_set.all().delete()
@@ -95,29 +106,30 @@ class AttendeeView(FormView):
                 EventAttendee.objects.create(person=person, event=self.event)
         return super().form_valid(form)
 
-    def get_success_url(self):
-        return reverse_lazy("invitations:event_add_task", kwargs={"pk": self.event.pk})
+    def get_success_url(self) -> str:
+        assert self.event is not None
+        return str(reverse_lazy("invitations:event_add_task", kwargs={"pk": self.event.pk}))
 
 
 class TaskView(FormView):
     template_name = "invitations/task.html"
     form_class = EventTaskFormSet
 
-    def get_initial(self):
+    def get_initial(self) -> list[dict[str, str]]:  # type: ignore[override]
         event = Event.objects.get(pk=self.kwargs["pk"])
         return [{"task": t.task} for t in event.eventtask_set.all()]
 
-    def get_form_kwargs(self):
+    def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["form_kwargs"] = {"event": self.kwargs["pk"]}
         return kwargs
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["pk"] = self.kwargs["pk"]
         return context
 
-    def form_valid(self, form):
+    def form_valid(self, form: Any) -> HttpResponse:
         event = Event.objects.get(pk=self.kwargs["pk"])
         event.eventtask_set.all().delete()
         for f in form:
@@ -125,14 +137,14 @@ class TaskView(FormView):
         event.assign_attendee_tasks()
         return super().form_valid(form)
 
-    def get_success_url(self):
-        return reverse_lazy(
+    def get_success_url(self) -> str:
+        return str(reverse_lazy(
             "invitations:event_invite", kwargs={"pk": self.kwargs["pk"]}
-        )
+        ))
 
 
 class EmailMixin:
-    def get_email_context(self, context, event):
+    def get_email_context(self, context: dict[str, Any], event: Event) -> dict[str, Any]:
         context["event"] = event
         tasks = event.eventtask_set.all()
         attendees = event.eventattendee_set.all()
@@ -151,7 +163,7 @@ class EmailMixin:
 class InviteView(EmailMixin, TemplateView):
     template_name = "invitations/invite.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         event = Event.objects.get(pk=self.kwargs["pk"])
         context = self.get_email_context(context, event)
@@ -160,20 +172,21 @@ class InviteView(EmailMixin, TemplateView):
 
 class FinalView(EmailMixin, TemplateView):
     template_name = "invitations/final.html"
-    event = None
+    event: Event | None = None
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         self.event = Event.objects.get(pk=self.kwargs["pk"])
         context["event"] = self.event
         return context
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         response = super().get(request, *args, **kwargs)
         self.send_email()
         return response
 
-    def send_email(self):
+    def send_email(self) -> None:
+        assert self.event is not None
         context = self.get_email_context({}, self.event)
         text_content = render_to_string("invitations/invite_email.txt", context)
         html_content = render_to_string("invitations/invite_email.html", context)
@@ -188,7 +201,7 @@ class FinalView(EmailMixin, TemplateView):
         email.send()
 
 
-def add_attendee_form(request):
+def add_attendee_form(request: HttpRequest) -> HttpResponse:
     """Returns a single attendee form row for htmx-powered dynamic addition.
 
     Called via htmx GET when the user clicks '+' on the attendee step. Reads
@@ -207,7 +220,7 @@ def add_attendee_form(request):
     })
 
 
-def add_task_form(request, pk):
+def add_task_form(request: HttpRequest, pk: int) -> HttpResponse:
     """Returns a single task form row for htmx-powered dynamic addition.
 
     Called via htmx GET when the user clicks '+' on the task step. Reads the
@@ -225,5 +238,3 @@ def add_task_form(request, pk):
         "index": index + 1,
         "new_total": index + 1,
     })
-
-
